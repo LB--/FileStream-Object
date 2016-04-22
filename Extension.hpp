@@ -89,9 +89,62 @@ public:
 	 * store a pointer.
 	 */
 
-	//stdtstring MyString;
-	//int MyInt;
-	//std::vector<float> MyArray;
+	stdtstring error_msg;
+	struct SlotId final
+	{
+		int id;
+		stdtstring filepath;
+
+		SlotId(int id, stdtstring const &filepath)
+		: id{id}
+		, filepath{filepath}
+		{
+		}
+
+		bool operator<(SlotId const &other) const noexcept
+		{
+			return id < other.id;
+		}
+		bool operator==(SlotId const &other) const noexcept
+		{
+			return id == other.id;
+		}
+		friend bool operator<(SlotId const &slot, int id) noexcept
+		{
+			return slot.id < id;
+		}
+		friend bool operator<(int id, SlotId const &slot) noexcept
+		{
+			return id < slot.id;
+		}
+		friend bool operator<(SlotId const &slot, stdtstring const &filepath) noexcept
+		{
+			return slot.filepath < filepath;
+		}
+		friend bool operator<(stdtstring const &filepath, SlotId const &slot) noexcept
+		{
+			return filepath < slot.filepath;
+		}
+		friend bool operator<(SlotId const &slot, TCHAR const *filepath) noexcept
+		{
+			return slot.filepath < filepath;
+		}
+		friend bool operator<(TCHAR const *filepath, SlotId const &slot) noexcept
+		{
+			return filepath < slot.filepath;
+		}
+	};
+	std::map<SlotId, std::fstream, std::less<>> slots;
+
+	template<typename... Args>
+	void generate_error(Args &&... args)
+	{
+		std::wostringstream message;
+		using helper = int[];
+		(void)helper{0, (void(message << std::forward<Args>(args)), 0)...};
+		error_msg = message.str();
+		Runtime.GenerateEvent(0); //OnError
+	}
 
 
 	/* Add your actions, conditions, and expressions
@@ -106,15 +159,39 @@ public:
 	 */
 
 	//Actions - Defined in Actions.cpp
-	void ActionExample(int ExampleParameter);
-	void SecondActionExample();
+	void OpenStream(TCHAR const *filepath, int slot, int flags);
+	void CloseStream(int slot);
+	void SetByte(int slot, unsigned position, int value);
+	void SetShort(int slot, unsigned position, int value);
+	void SetInt(int slot, unsigned position, int value);
+	void SetFloat(int slot, unsigned position, float value);
+	void SetDouble(int slot, unsigned position, float value);
+	void SetString8(int slot, unsigned position, TCHAR const *str, int nullterm);
+	void SetString16(int slot, unsigned position, TCHAR const *str, int nullterm);
+	void ClearError(int slot);
+	void FromMemory(int slot, unsigned position, void const *memory, unsigned size);
+	void ToMemory(int slot, unsigned position, void *memory, unsigned size);
 
 	//Conditions - Defined in Conditions.cpp
-	bool AreTwoNumbersEqual(int FirstNumber, int SecondNumber);
+	bool OnError();
+	bool IsOpen(int slot);
+	bool IsOk(int slot);
+	bool FileExists(TCHAR const *filepath);
 
 	//Expressions - Defined in Expressions.cpp
-	int Add(int FirstNumber, int SecondNumber);
-	const TCHAR * HelloWorld();
+	TCHAR const *GetError();
+	int SignedByteAt(int slot, unsigned position);
+	int SignedShortAt(int slot, unsigned position);
+	int UnsignedByteAt(int slot, unsigned position);
+	int UnsignedShortAt(int slot, unsigned position);
+	int IntAt(int slot, unsigned position);
+	float FloatAt(int slot, unsigned position);
+	float DoubleAt(int slot, unsigned position);
+	TCHAR const *String8At(int slot, unsigned position);
+	TCHAR const *String16At(int slot, unsigned position);
+	unsigned ReadCursorPos(int slot);
+	unsigned WriteCursorPos(int slot);
+	unsigned FileSize(int slot);
 
 
 	short Handle();         //defined & documented in Extension.cpp

@@ -1,75 +1,319 @@
 {
 	"About":
 	{
-		"Name": "EDIF Template Object",
-		"Author": "Your Name",
-		"Copyright": "Copyright © 2014 Your Name",
-		"Comment": "A sentence or two to describe your extension,\nwith up to four lines of text.",
-		"URL": "http://www.example.com/",
-		"Help": "Help/My New EDIF Extension/Help.chm",
-		"Identifier": "X&pl"
+		"Name": "File Stream Object",
+		"Author": "Nicholas \"LB\" Braden",
+		"Copyright": "Copyright © 2016 Nicholas \"LB\" Braden",
+		"Comment": "This object allows you to open and manage file streams without loading the files into memory.\nMade by request for Alonso.\nIcon thanks to Alonso.",
+		"URL": "http://www.LB-Stuff.com/MMF2/Extensions/",
+		"Help": "Help/File Stream/Help.chm",
+		"Identifier": "FSTR"
 	},
 
 	"ActionMenu":
 	[
 		"Separator",
-		[0, "Action Example"],
+		[0, "Open File Stream"],
+		[1, "Close File Stream"],
 		"Separator",
-		["Sub Menu",
-			[1, "Second Action Example"]
+		[2, "Set Byte"],
+		[3, "Set Short"],
+		[4, "Set Int"],
+		[5, "Set Float"],
+		[6, "Set Double"],
+		["Set String",
+			[7, "Encoded as UTF-8"],
+			[9, "Encoded as UTF-16"],
 		],
 		"Separator",
-		[0, "A Disabled Menu Item", true],
+		[10, "Write Memory to File"],
+		[11, "Read File to Memory"],
+		"Separator",
+		[8, "Clear Error State"],
 		"Separator"
 	],
 	"ConditionMenu":
 	[
 		"Separator",
-		[0, "Are two numbers equal?"],
+		[0, "On Error"],
+		"Separator",
+		[1, "File is Open"],
+		[2, "File is OK"],
+		"Separator",
+		[3, "File Exists/has Read Access"],
 		"Separator"
 	],
 	"ExpressionMenu":
 	[
 		"Separator",
-		[0, "Add two numbers"],
-		[1, "Hello world"],
+		[12, "Get Error Message"],
+		"Separator",
+		[0, "Get Signed Byte"],
+		[9, "Get Unsigned Byte"],
+		[1, "Get Signed Short"],
+		[10, "Get Unsigned Short"],
+		[2, "Get Int"],
+		[3, "Get Float"],
+		[4, "Get Double"],
+		["Get String",
+			[5, "Encoded as UTF-8"],
+			[11, "Encoded as UTF-16"],
+		],
+		"Separator",
+		[6, "Get Read Cursor Position"],
+		[7, "Get Write Cursor Position"],
+		[8, "Get File Size"],
 		"Separator"
 	],
 
 	"Actions":
 	[
-		{	"Title": "Action Example with parameter %0",
+		{//0
+			"Title": "Open File Stream on %0 in Slot %1 with flags %2",
 			"Parameters":
 			[
-				["Integer", "Example Parameter"]
+				["String", "Path to File"],
+				["Integer", "Slot (will close old stream in slot)"],
+				["Integer", "Flags (add together): 1 = read, 2 = write, 4 = clear file contents first, 8 = force append to file"]
 			]
 		},
-		{	"Title": "Second Action Example"
+		{//1
+			"Title": "Close File Stream on %0 in Slot %1 with flags %2",
+			"Parameters":
+			[
+				["Integer", "Slot to close"],
+			]
+		},
+		{//2
+			"Title": "Slot %0: Set byte at %1 to %2",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"],
+				["Integer", "Byte (-128 to +127 or 0 to 255)"]
+			]
+		},
+		{//3
+			"Title": "Slot %0: Set short at %1 to %2",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"],
+				["Integer", "Byte (-32768 to +32767 or 0 to 65535)"]
+			]
+		},
+		{//4
+			"Title": "Slot %0: Set int at %1 to %2",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"],
+				["Integer", "Int"]
+			]
+		},
+		{//5
+			"Title": "Slot %0: Set float at %1 to %2",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"],
+				["Float", "Float"]
+			]
+		},
+		{//6
+			"Title": "Slot %0: Set double at %1 to %2",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"],
+				["Float", "Double"]
+			]
+		},
+		{//7
+			"Title": "Slot %0: Set utf-8 string at %1 to %2 (null terminate = %3)",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"],
+				["String", "String"],
+				["Integer", "Null Terminate? 0 = No, anything else = Yes"]
+			]
+		},
+		{//8
+			"Title": "Slot %0: Clear error state",
+			"Parameters":
+			[
+				["Integer", "Slot"]
+			]
+		},
+		{//9
+			"Title": "Slot %0: Set utf-16 string at %1 to %2 (null terminate = %3)",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"],
+				["String", "String"],
+				["Integer", "Null Terminate? 0 = No, anything else = Yes"]
+			]
+		},
+		{//10
+			"Title": "Slot %0: Write to %1 from memory at %2, size = %3",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"],
+				["Integer", "Memory Address to Read from (e.g. Binary Object or Lacewing)"],
+				["Integer", "Size of the memory in bytes"]
+			]
+		},
+		{//11
+			"Title": "Slot %0: Read from %1 to memory at %2, size = %3",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"],
+				["Integer", "Memory Address to Write to (e.g. Binary Object or Lacewing)"],
+				["Integer", "Size of the memory in bytes"]
+			]
 		}
 	],
 	"Conditions":
 	[
-		{	"Title": "%o: Are %0 and %1 equal?",
+		{//0
+			"Title": "%o: On Error",
+			"Triggered": true
+		},
+		{//1
+			"Title": "%o: File in Slot %0 is Open",
 			"Parameters":
 			[
-				["Integer", "First number"],
-				["Integer", "Second number"]
+				["Integer", "Slot to Check"]
+			],
+			"Triggered": false
+		},
+		{//2
+			"Title": "%o: File in Slot %0 is OK",
+			"Parameters":
+			[
+				["Integer", "Slot to Check"]
+			],
+			"Triggered": false
+		},
+		{//3
+			"Title": "%o: File path %0 exists/is readable",
+			"Parameters":
+			[
+				["String", "Path to File"]
 			],
 			"Triggered": false
 		}
 	],
 	"Expressions":
 	[
-		{	"Title": "Add(",
+		{//0
+			"Title": "SignedByteAt(",
 			"Returns": "Integer",
 			"Parameters":
 			[
-				["Integer", "First number"],
-				["Integer", "Second number"]
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"]
 			]
 		},
-		{	"Title": "HelloWorld$(",
-			"Returns": "Text"
+		{//1
+			"Title": "SignedShortAt(",
+			"Returns": "Integer",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"]
+			]
+		},
+		{//2
+			"Title": "IntAt(",
+			"Returns": "Integer",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"]
+			]
+		},
+		{//3
+			"Title": "FloatAt(",
+			"Returns": "Float",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"]
+			]
+		},
+		{//4
+			"Title": "DoubleAt(",
+			"Returns": "Float",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"]
+			]
+		},
+		{//5
+			"Title": "String8At$(",
+			"Returns": "String",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"]
+			]
+		},
+		{//6
+			"Title": "ReadCursorPos(",
+			"Returns": "Integer",
+			"Parameters":
+			[
+				["Integer", "Slot"]
+			]
+		},
+		{//7
+			"Title": "WriteCursorPos(",
+			"Returns": "Integer",
+			"Parameters":
+			[
+				["Integer", "Slot"]
+			]
+		},
+		{//8
+			"Title": "FileSize(",
+			"Returns": "Integer",
+			"Parameters":
+			[
+				["Integer", "Slot"]
+			]
+		},
+		{//9
+			"Title": "UnsignedByteAt(",
+			"Returns": "Integer",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"]
+			]
+		},
+		{//10
+			"Title": "UnsignedShortAt(",
+			"Returns": "Integer",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"]
+			]
+		},
+		{//11
+			"Title": "String16At$(",
+			"Returns": "String",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"]
+			]
 		}
 	]
 }

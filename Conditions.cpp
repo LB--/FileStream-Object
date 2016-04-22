@@ -8,7 +8,32 @@
 
 #include "Common.h"
 
-bool Extension::AreTwoNumbersEqual(int First, int Second)
+bool Extension::OnError()
 {
-	return First == Second;
+	return true;
+}
+
+bool Extension::IsOpen(int slot)
+{
+	auto const it = std::as_const(slots).find(slot);
+	return it != std::cend(slots) && it->second.is_open();
+}
+
+bool Extension::IsOk(int slot)
+{
+	auto const it = std::as_const(slots).find(slot);
+	return it != std::cend(slots) && bool(it->second);
+}
+
+bool Extension::FileExists(TCHAR const *filepath)
+{
+	auto const it = std::as_const(slots).find(filepath);
+	if(it != std::cend(slots))
+	{
+		if(it->second.is_open())
+		{
+			return true;
+		}
+	}
+	return bool(std::ifstream{filepath});
 }

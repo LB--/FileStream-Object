@@ -35,13 +35,37 @@ Extension::Extension(RD *rd, SerializedED *SED, createObjectInfo *COB)
 {
 	//Link all your action/condition/expression functions
 	//to their IDs to match the IDs in the JSON here.
-	LinkAction(0, ActionExample);
-	LinkAction(1, SecondActionExample);
+	LinkAction(0, OpenStream);
+	LinkAction(1, CloseStream);
+	LinkAction(2, SetByte);
+	LinkAction(3, SetShort);
+	LinkAction(4, SetInt);
+	LinkAction(5, SetFloat);
+	LinkAction(6, SetDouble);
+	LinkAction(7, SetString8);
+	LinkAction(8, ClearError);
+	LinkAction(9, SetString16);
+	LinkAction(10, FromMemory);
+	LinkAction(11, ToMemory);
 
-	LinkCondition(0, AreTwoNumbersEqual);
+	LinkCondition(0, OnError);
+	LinkCondition(1, IsOpen);
+	LinkCondition(2, IsOk);
+	LinkCondition(3, FileExists);
 
-	LinkExpression(0, Add);
-	LinkExpression(1, HelloWorld);
+	LinkExpression(0, SignedByteAt);
+	LinkExpression(1, SignedShortAt);
+	LinkExpression(2, IntAt);
+	LinkExpression(3, FloatAt);
+	LinkExpression(4, DoubleAt);
+	LinkExpression(5, String8At);
+	LinkExpression(6, ReadCursorPos);
+	LinkExpression(7, WriteCursorPos);
+	LinkExpression(8, FileSize);
+	LinkExpression(9, UnsignedByteAt);
+	LinkExpression(10, UnsignedShortAt);
+	LinkExpression(11, String16At);
+	LinkExpression(12, GetError);
 
 
 	//This is where you'd do anything you'd do in CreateRunObject in the original SDK.

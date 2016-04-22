@@ -8,13 +8,79 @@
 
 #include "Common.h"
 
-int Extension::Add(int First, int Second)
+TCHAR const *Extension::GetError()
 {
-	return First + Second;
+	return Runtime.CopyString(error_msg.c_str());
 }
 
-TCHAR const * Extension::HelloWorld()
+int Extension::SignedByteAt(int slot, unsigned position)
 {
-	return _T("Hello world!");
-	//return Runtime.CopyString(MyString.c_str()); //for stdtstrings
+	//
+	return 0;
+}
+
+int Extension::SignedShortAt(int slot, unsigned position)
+{
+	//
+	return 0;
+}
+
+int Extension::UnsignedByteAt(int slot, unsigned position)
+{
+	//
+	return 0;
+}
+
+int Extension::UnsignedShortAt(int slot, unsigned position)
+{
+	//
+	return 0;
+}
+
+int Extension::IntAt(int slot, unsigned position)
+{
+	//
+	return 0;
+}
+
+float Extension::FloatAt(int slot, unsigned position)
+{
+	//
+	return 0.0f;
+}
+
+float Extension::DoubleAt(int slot, unsigned position)
+{
+	//
+	return 0.0f;
+}
+
+TCHAR const *Extension::String8At(int slot, unsigned position)
+{
+	//
+	return _T("");
+}
+
+TCHAR const *Extension::String16At(int slot, unsigned position)
+{
+	//
+	return _T("");
+}
+
+unsigned Extension::ReadCursorPos(int slot)
+{
+	//
+	return 0u;
+}
+
+unsigned Extension::WriteCursorPos(int slot)
+{
+	//
+	return 0u;
+}
+
+unsigned Extension::FileSize(int slot)
+{
+	//
+	return 0u;
 }

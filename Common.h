@@ -21,8 +21,9 @@
 #include "Resource.h"
 
 #include <cstdint>
-//#include <someheader>
-//#include "YourHeader.hpp"
+#include <fstream>
+#include <map>
+#include <sstream>
 
 /* stdtstring
  * A std::string that knows if you're using
