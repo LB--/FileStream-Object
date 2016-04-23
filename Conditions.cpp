@@ -22,7 +22,7 @@ bool Extension::IsOpen(int slot)
 bool Extension::IsOk(int slot)
 {
 	auto const it = std::as_const(slots).find(slot);
-	return it != std::cend(slots) && bool(it->second);
+	return it != std::cend(slots) && !it->second.bad();
 }
 
 bool Extension::FileExists(TCHAR const *filepath)

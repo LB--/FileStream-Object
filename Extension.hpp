@@ -94,12 +94,18 @@ public:
 	{
 		int id;
 		stdtstring filepath;
+		std::ios::openmode flags;
 
-		SlotId(int id, stdtstring const &filepath)
+		SlotId(int id, stdtstring const &filepath, std::ios::openmode flags)
 		: id{id}
 		, filepath{filepath}
+		, flags{flags}
 		{
 		}
+		SlotId(SlotId const &) = default;
+		SlotId &operator=(SlotId const &) = default;
+		SlotId(SlotId &&) = default;
+		SlotId &operator=(SlotId &&) = default;
 
 		bool operator<(SlotId const &other) const noexcept
 		{
@@ -134,7 +140,8 @@ public:
 			return filepath < slot.filepath;
 		}
 	};
-	std::map<SlotId, std::fstream, std::less<>> slots;
+	using Slots_t = std::map<SlotId, std::fstream, std::less<>>;
+	Slots_t slots;
 
 	template<typename... Args>
 	void generate_error(Args &&... args)
@@ -144,6 +151,92 @@ public:
 		(void)helper{0, (void(message << std::forward<Args>(args)), 0)...};
 		error_msg = message.str();
 		Runtime.GenerateEvent(0); //OnError
+	}
+
+	bool safe_helper(Slots_t::iterator it)
+	{
+		auto &fs = it->second;
+		if(!fs.is_open()) //should not happen
+		{
+			slots.erase(it); //fix our mistake
+			return generate_error("Slot ", it->first.id, " is not open"), false;
+		}
+		if(fs.bad())
+		{
+			return generate_error("Slot ", it->first.id, " is in an unrecoverable error state from a previous operation - close the stream and try again"), false;
+		}
+		if(fs.fail() || fs.eof())
+		{
+			fs.clear();
+		}
+		return true;
+	}
+	template<typename F>
+	void safe_seekp(int slot, unsigned position, F func)
+	{
+		auto it = slots.find(slot);
+		if(it != std::end(slots))
+		{
+			if(!safe_helper(it))
+			{
+				return;
+			}
+			if(!(it->first.flags & std::ios::out))
+			{
+				return generate_error("Cannot write to slot ", slot, " because it is opened as read only");
+			}
+			it->second.seekp(position);
+			if(!it->second.good())
+			{
+				return generate_error("Could not seek to write position ", position, " in slot ", slot);
+			}
+			func(it);
+			return;
+		}
+		return generate_error("Slot ", slot, " does not exist");
+	}
+	template<typename F>
+	void safe_seekg(int slot, unsigned position, F func)
+	{
+		auto it = slots.find(slot);
+		if(it != std::end(slots))
+		{
+			if(!safe_helper(it))
+			{
+				return;
+			}
+			if(!(it->first.flags & std::ios::in))
+			{
+				return generate_error("Cannot read from slot ", slot, " because it is opened as write only");
+			}
+			it->second.seekg(position);
+			if(!it->second.good())
+			{
+				return generate_error("Could not seek to read position ", position, " in slot ", slot);
+			}
+			func(it);
+			return;
+		}
+		return generate_error("Slot ", slot, " does not exist");
+	}
+
+	template<typename T>
+	void write_primitive(Slots_t::iterator it, T value)
+	{
+		it->second.write(reinterpret_cast<char const *>(&value), sizeof(value));
+		if(!it->second.good())
+		{
+			return generate_error("Could not write value ", value, " to position ", it->second.tellp(), " in slot ", it->first.id);
+		}
+	}
+	template<typename T>
+	void read_primitive(Slots_t::iterator it, T &value)
+	{
+		it->second.read(reinterpret_cast<char *>(&value), sizeof(value));
+		if(!it->second.good())
+		{
+			return generate_error("Could not read value from position ", it->second.tellg(), " in slot ", it->first.id);
+		}
 	}
 
 
