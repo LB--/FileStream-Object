@@ -39,6 +39,16 @@ void Extension::CloseStream(int slot)
 	}
 }
 
+void Extension::SetReadCursorPos(int slot, unsigned position)
+{
+	return safe_seekg(slot, position, [](Slots_t::iterator){});
+}
+
+void Extension::SetWriteCursorPos(int slot, unsigned position)
+{
+	return safe_seekp(slot, position, [](Slots_t::iterator){});
+}
+
 void Extension::SetByte(int slot, unsigned position, int value)
 {
 	return safe_seekp(slot, position, std::bind

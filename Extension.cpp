@@ -49,6 +49,8 @@ Extension::Extension(RD *rd, SerializedED *SED, createObjectInfo *COB)
 	LinkAction(11, ToMemory);
 	LinkAction(12, SetSizedString8);
 	LinkAction(13, SetSizedString16);
+	LinkAction(14, SetReadCursorPos);
+	LinkAction(15, SetWriteCursorPos);
 
 	LinkCondition(0, OnError);
 	LinkCondition(1, IsOpen);

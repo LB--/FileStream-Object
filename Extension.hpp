@@ -276,6 +276,8 @@ public:
 	//Actions - Defined in Actions.cpp
 	void OpenStream(TCHAR const *filepath, int slot, int flags);
 	void CloseStream(int slot);
+	void SetReadCursorPos(int slot, unsigned position);
+	void SetWriteCursorPos(int slot, unsigned position);
 	void SetByte(int slot, unsigned position, int value);
 	void SetShort(int slot, unsigned position, int value);
 	void SetInt(int slot, unsigned position, int value);

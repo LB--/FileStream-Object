@@ -16,6 +16,9 @@
 		[0, "Open File Stream"],
 		[1, "Close File Stream"],
 		"Separator",
+		[14, "Set Read Cursor Position"],
+		[15, "Set Write Cursor Position"],
+		"Separator",
 		[2, "Set Byte"],
 		[3, "Set Short"],
 		[4, "Set Int"],
@@ -210,6 +213,22 @@
 				["Integer", "Slot"],
 				["Integer", "Position in File (be careful not to exceed the file size)"],
 				["String", "String"]
+			]
+		},
+		{//14
+			"Title": "Slot %0: Set read cursor position to %1",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"]
+			]
+		},
+		{//15
+			"Title": "Slot %0: Set write cursor position to %1",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"]
 			]
 		}
 	],
