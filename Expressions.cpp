@@ -10,11 +10,13 @@
 
 TCHAR const *Extension::GetError()
 {
+//	DuringExpression de {*this};
 	return Runtime.CopyString(error_msg.c_str());
 }
 
 int Extension::SignedByteAt(int slot, unsigned position)
 {
+	DuringExpression de {*this};
 	std::int8_t value {};
 	safe_seekg(slot, position, std::bind
 	(
@@ -25,6 +27,7 @@ int Extension::SignedByteAt(int slot, unsigned position)
 
 int Extension::SignedShortAt(int slot, unsigned position)
 {
+	DuringExpression de {*this};
 	std::int16_t value {};
 	safe_seekg(slot, position, std::bind
 	(
@@ -35,6 +38,7 @@ int Extension::SignedShortAt(int slot, unsigned position)
 
 int Extension::UnsignedByteAt(int slot, unsigned position)
 {
+	DuringExpression de {*this};
 	std::uint8_t value {};
 	safe_seekg(slot, position, std::bind
 	(
@@ -45,6 +49,7 @@ int Extension::UnsignedByteAt(int slot, unsigned position)
 
 int Extension::UnsignedShortAt(int slot, unsigned position)
 {
+	DuringExpression de {*this};
 	std::uint16_t value {};
 	safe_seekg(slot, position, std::bind
 	(
@@ -55,6 +60,7 @@ int Extension::UnsignedShortAt(int slot, unsigned position)
 
 int Extension::IntAt(int slot, unsigned position)
 {
+	DuringExpression de {*this};
 	std::int32_t value {};
 	safe_seekg(slot, position, std::bind
 	(
@@ -65,6 +71,7 @@ int Extension::IntAt(int slot, unsigned position)
 
 float Extension::FloatAt(int slot, unsigned position)
 {
+	DuringExpression de {*this};
 	float value {};
 	safe_seekg(slot, position, std::bind
 	(
@@ -75,6 +82,7 @@ float Extension::FloatAt(int slot, unsigned position)
 
 float Extension::DoubleAt(int slot, unsigned position)
 {
+	DuringExpression de {*this};
 	double value {};
 	safe_seekg(slot, position, std::bind
 	(
@@ -85,18 +93,144 @@ float Extension::DoubleAt(int slot, unsigned position)
 
 TCHAR const *Extension::String8At(int slot, unsigned position)
 {
-	//
-	return _T("");
+	DuringExpression de {*this};
+	std::string str;
+	safe_seekg(slot, position, [=, &str](Slots_t::iterator it)
+	{
+		std::getline(it->second, str, '\0');
+		if(it->second.eof())
+		{
+			generate_error("Reached end of file while reading null-terminated UTF-8 string from position ", position, " for slot ", slot, "; only ", str.size(), " bytes were read");
+		}
+		else if(!it->second.good())
+		{
+			generate_error("Could not read null-terminated UTF-8 string from position ", position, " for slot ", slot, "; only ", str.size(), " bytes were read");
+		}
+	});
+	return Runtime.CopyString(str_to16fr8(str).c_str());
 }
 
 TCHAR const *Extension::String16At(int slot, unsigned position)
 {
-	//
-	return _T("");
+	DuringExpression de {*this};
+	std::wstring str;
+	safe_seekg(slot, position, [=, &str](Slots_t::iterator it)
+	{
+		for(TCHAR c = _T('\0')
+		;   it->second.read(reinterpret_cast<char *>(&c), sizeof(TCHAR)), it->second.good() && c != _T('\0')
+		;   str += c)
+		{
+		}
+		if(it->second.eof())
+		{
+			generate_error("Reached end of file while reading null-terminated UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " code points were read");
+		}
+		else if(!it->second.good())
+		{
+			generate_error("Could not read null-terminated UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " code points were read");
+		}
+	});
+	return Runtime.CopyString(str.c_str());
+}
+
+TCHAR const *Extension::SizedString8At(int slot, unsigned position)
+{
+	DuringExpression de {*this};
+	std::string str;
+	if(auto size = static_cast<std::uint32_t>(IntAt(slot, position)))
+	{
+		safe_seekg(slot, position + sizeof(std::uint32_t), [=, &str](Slots_t::iterator it)
+		{
+			auto buf = std::make_unique<std::string::value_type[]>(size);
+			it->second.read(buf.get(), size);
+			str.assign(buf.get(), static_cast<std::size_t>(it->second.gcount()));
+			if(it->second.eof())
+			{
+				generate_error("Reached end of file while reading length-terminated UTF-8 string from position ", position, " for slot ", slot, "; only ", str.size(), " of ", size, " bytes were read");
+			}
+			else if(!it->second.good())
+			{
+				generate_error("Could not read length-terminated UTF-8 string from position ", position, " for slot ", slot, "; only ", str.size(), " of ", size, " bytes were read");
+			}
+		});
+	}
+	return Runtime.CopyString(str_to16fr8(str).c_str());
+}
+
+TCHAR const *Extension::SizedString16At(int slot, unsigned position)
+{
+	DuringExpression de {*this};
+	std::wstring str;
+	if(auto size = static_cast<std::uint32_t>(IntAt(slot, position)))
+	{
+		safe_seekg(slot, position + sizeof(std::uint32_t), [=, &str](Slots_t::iterator it)
+		{
+			for(TCHAR c = _T('\0')
+			;   str.size() < size && (it->second.read(reinterpret_cast<char *>(&c), sizeof(TCHAR)), it->second.good())
+			;   str += c)
+			{
+			}
+			if(it->second.eof())
+			{
+				generate_error("Reached end of file while reading length-terminated UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " of ", size, " code points were read");
+			}
+			else if(!it->second.good())
+			{
+				generate_error("Could not read length-terminated UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " of ", size, " code points were read");
+			}
+		});
+	}
+	return Runtime.CopyString(str.c_str());
+}
+
+TCHAR const *Extension::CustomString8At(int slot, unsigned position, unsigned size)
+{
+	DuringExpression de {*this};
+	std::string str;
+	safe_seekg(slot, position + sizeof(std::uint32_t), [=, &str](Slots_t::iterator it)
+	{
+		auto buf = std::make_unique<std::string::value_type[]>(size);
+		it->second.read(buf.get(), size);
+		str.assign(buf.get(), static_cast<std::size_t>(it->second.gcount()));
+		if(it->second.eof())
+		{
+			generate_error("Reached end of file while reading custom-size UTF-8 string from position ", position, " for slot ", slot, "; only ", str.size(), " of ", size, " bytes were read");
+		}
+		else if(!it->second.good())
+		{
+			generate_error("Could not read custom-size UTF-8 string from position ", position, " for slot ", slot, "; only ", str.size(), " of ", size, " bytes were read");
+		}
+	});
+	return Runtime.CopyString(str_to16fr8(str).c_str());
+}
+
+TCHAR const *Extension::CustomString16At(int slot, unsigned position, unsigned size)
+{
+	DuringExpression de {*this};
+	std::wstring str;
+	safe_seekg(slot, position + sizeof(std::uint32_t), [=, &str](Slots_t::iterator it)
+	{
+		std::uint32_t i = 0;
+		for(TCHAR c = _T('\0')
+		;   it->second.read(reinterpret_cast<char *>(&c), sizeof(TCHAR)), it->second.good() && i < size
+		;   str += c, ++i)
+		{
+		}
+		if(it->second.eof())
+		{
+			generate_error("Reached end of file while reading custom-size UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " of ", size, " code points were read");
+		}
+		else if(!it->second.good())
+		{
+			generate_error("Could not read custom-size UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " of ", size, " code points were read");
+		}
+	});
+	return Runtime.CopyString(str.c_str());
 }
 
 unsigned Extension::ReadCursorPos(int slot)
 {
+	DuringExpression de {*this};
 	auto it = slots.find(slot);
 	if(it != std::end(slots))
 	{
@@ -111,6 +245,7 @@ unsigned Extension::ReadCursorPos(int slot)
 
 unsigned Extension::WriteCursorPos(int slot)
 {
+	DuringExpression de {*this};
 	auto it = slots.find(slot);
 	if(it != std::end(slots))
 	{
@@ -125,6 +260,7 @@ unsigned Extension::WriteCursorPos(int slot)
 
 unsigned Extension::FileSize(int slot)
 {
+	DuringExpression de {*this};
 	auto it = slots.find(slot);
 	if(it != std::end(slots))
 	{

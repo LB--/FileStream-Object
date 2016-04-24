@@ -26,7 +26,7 @@ void Extension::OpenStream(TCHAR const *filepath, int slot, int flags)
 	}
 	else
 	{
-		return generate_error("Unable to open file stream on \"", filepath, "\" for slot ", slot);
+		return generate_error("Unable to open file stream on \"", str_to8fr16(filepath), "\" for slot ", slot);
 	}
 }
 
@@ -83,7 +83,12 @@ void Extension::SetString8(int slot, unsigned position, TCHAR const *str, int nu
 {
 	return safe_seekp(slot, position, [=](Slots_t::iterator it)
 	{
-		//
+		auto s = str_to8fr16(str);
+		it->second.write(s.c_str(), s.size()+(nullterm? 1 : 0));
+		if(!it->second.good())
+		{
+			return generate_error("Could not write UTF-8 string to position ", position, " for slot ", slot);
+		}
 	});
 }
 
@@ -91,7 +96,40 @@ void Extension::SetString16(int slot, unsigned position, TCHAR const *str, int n
 {
 	return safe_seekp(slot, position, [=](Slots_t::iterator it)
 	{
-		//
+		it->second.write(reinterpret_cast<char const *>(str), (std::wcslen(str)+(nullterm? 1 : 0))*sizeof(TCHAR));
+		if(!it->second.good())
+		{
+			return generate_error("Could not write UTF-16 string to position ", position, " for slot ", slot);
+		}
+	});
+}
+
+void Extension::SetSizedString8(int slot, unsigned position, TCHAR const *str)
+{
+	return safe_seekp(slot, position, [=](Slots_t::iterator it)
+	{
+		auto s = str_to8fr16(str);
+		std::uint32_t size = s.size();
+		it->second.write(reinterpret_cast<char const *>(&size), sizeof(std::uint32_t));
+		it->second.write(s.c_str(), s.size());
+		if(!it->second.good())
+		{
+			return generate_error("Could not write UTF-8 string to position ", position, " for slot ", slot);
+		}
+	});
+}
+
+void Extension::SetSizedString16(int slot, unsigned position, TCHAR const *str)
+{
+	return safe_seekp(slot, position, [=](Slots_t::iterator it)
+	{
+		std::uint32_t size = std::wcslen(str);
+		it->second.write(reinterpret_cast<char const *>(&size), sizeof(std::uint32_t));
+		it->second.write(reinterpret_cast<char const *>(str), size*sizeof(TCHAR));
+		if(!it->second.good())
+		{
+			return generate_error("Could not write UTF-16 string to position ", position, " for slot ", slot);
+		}
 	});
 }
 

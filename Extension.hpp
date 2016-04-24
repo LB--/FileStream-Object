@@ -143,14 +143,39 @@ public:
 	using Slots_t = std::map<SlotId, std::fstream, std::less<>>;
 	Slots_t slots;
 
+	std::size_t expression_depth = 0;
+	struct DuringExpression final
+	{
+		Extension &e;
+		DuringExpression(Extension &e)
+		: e(e)
+		{
+			++e.expression_depth;
+		}
+		~DuringExpression()
+		{
+			--e.expression_depth;
+		}
+	};
 	template<typename... Args>
 	void generate_error(Args &&... args)
 	{
-		std::wostringstream message;
+		std::ostringstream message;
 		using helper = int[];
-		(void)helper{0, (void(message << std::forward<Args>(args)), 0)...};
-		error_msg = message.str();
-		Runtime.GenerateEvent(0); //OnError
+		(void)helper
+		{
+			0, (void(message << std::forward<Args>(args)), 0)...
+		};
+		error_msg = str_to16fr8(message.str());
+		if(expression_depth > 0)
+		{
+			//avoid crashing Fusion
+			Runtime.PushEvent(0); //OnError
+		}
+		else
+		{
+			Runtime.GenerateEvent(0); //OnError
+		}
 	}
 
 	bool safe_helper(Slots_t::iterator it)
@@ -261,6 +286,8 @@ public:
 	void SetDouble(int slot, unsigned position, float value);
 	void SetString8(int slot, unsigned position, TCHAR const *str, int nullterm);
 	void SetString16(int slot, unsigned position, TCHAR const *str, int nullterm);
+	void SetSizedString8(int slot, unsigned position, TCHAR const *str);
+	void SetSizedString16(int slot, unsigned position, TCHAR const *str);
 	void ClearError(int slot);
 	void FromMemory(int slot, unsigned position, void const *memory, unsigned size);
 	void ToMemory(int slot, unsigned position, void *memory, unsigned size);
@@ -282,6 +309,10 @@ public:
 	float DoubleAt(int slot, unsigned position);
 	TCHAR const *String8At(int slot, unsigned position);
 	TCHAR const *String16At(int slot, unsigned position);
+	TCHAR const *SizedString8At(int slot, unsigned position);
+	TCHAR const *SizedString16At(int slot, unsigned position);
+	TCHAR const *CustomString8At(int slot, unsigned position, unsigned bytes);
+	TCHAR const *CustomString16At(int slot, unsigned position, unsigned code_points);
 	unsigned ReadCursorPos(int slot);
 	unsigned WriteCursorPos(int slot);
 	unsigned FileSize(int slot);

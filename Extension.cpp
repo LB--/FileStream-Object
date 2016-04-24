@@ -47,6 +47,8 @@ Extension::Extension(RD *rd, SerializedED *SED, createObjectInfo *COB)
 	LinkAction(9, SetString16);
 	LinkAction(10, FromMemory);
 	LinkAction(11, ToMemory);
+	LinkAction(12, SetSizedString8);
+	LinkAction(13, SetSizedString16);
 
 	LinkCondition(0, OnError);
 	LinkCondition(1, IsOpen);
@@ -66,6 +68,10 @@ Extension::Extension(RD *rd, SerializedED *SED, createObjectInfo *COB)
 	LinkExpression(10, UnsignedShortAt);
 	LinkExpression(11, String16At);
 	LinkExpression(12, GetError);
+	LinkExpression(13, SizedString8At);
+	LinkExpression(14, SizedString16At);
+	LinkExpression(15, CustomString8At);
+	LinkExpression(16, CustomString16At);
 
 
 	//This is where you'd do anything you'd do in CreateRunObject in the original SDK.

@@ -22,8 +22,15 @@
 		[5, "Set Float"],
 		[6, "Set Double"],
 		["Set String",
-			[7, "Encoded as UTF-8"],
-			[9, "Encoded as UTF-16"],
+			["(Optionally) Null Terminated",
+				[7, "Encoded as UTF-8"],
+				[9, "Encoded as UTF-16"],
+			],
+			"separator",
+			["Length Terminated",
+				[12, "Encoded as UTF-8"],
+				[13, "Encoded as UTF-16"],
+			]
 		],
 		"Separator",
 		[10, "Write Memory to File"],
@@ -56,8 +63,19 @@
 		[3, "Get Float"],
 		[4, "Get Double"],
 		["Get String",
-			[5, "Encoded as UTF-8"],
-			[11, "Encoded as UTF-16"],
+			["Null Terminated",
+				[5, "Encoded as UTF-8"],
+				[11, "Encoded as UTF-16"],
+			],
+			["Length Terminated",
+				[13, "Encoded as UTF-8"],
+				[14, "Encoded as UTF-16"],
+				"Separator",
+				["With Custom Length",
+					[15, "Encoded as UTF-8"],
+					[16, "Encoded as UTF-16"],
+				]
+			]
 		],
 		"Separator",
 		[6, "Get Read Cursor Position"],
@@ -174,6 +192,24 @@
 				["Integer", "Position in File (be careful not to exceed the file size)"],
 				["Integer", "Memory Address to Write to (e.g. Binary Object or Lacewing)"],
 				["Integer", "Size of the memory in bytes"]
+			]
+		},
+		{//12
+			"Title": "Slot %0: Set utf-8 string at %1 to %2 (with size prefix)",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"],
+				["String", "String"]
+			]
+		},
+		{//13
+			"Title": "Slot %0: Set utf-16 string at %1 to %2 (with size prefix)",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"],
+				["String", "String"]
 			]
 		}
 	],
@@ -313,6 +349,48 @@
 			[
 				["Integer", "Slot"],
 				["Integer", "Position in File (be careful not to exceed the file size)"]
+			]
+		},
+		{//12
+			"Title": "LastError$(",
+			"Returns": "String"
+		},
+		{//13
+			"Title": "SizedString8At$(",
+			"Returns": "String",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"]
+			]
+		},
+		{//14
+			"Title": "SizedString16At$(",
+			"Returns": "String",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"]
+			]
+		},
+		{//15
+			"Title": "CustomString8At$(",
+			"Returns": "String",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"],
+				["Integer", "Size of string in bytes"]
+			]
+		},
+		{//16
+			"Title": "CustomString16At$(",
+			"Returns": "String",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"],
+				["Integer", "Length of string in UTF-16 code points (not characters or bytes)"]
 			]
 		}
 	]
