@@ -66,18 +66,13 @@
 		[3, "Get Float"],
 		[4, "Get Double"],
 		["Get String",
-			["Null Terminated",
+			["Null Terminated or Custom Length",
 				[5, "Encoded as UTF-8"],
 				[11, "Encoded as UTF-16"],
 			],
 			["Length Terminated",
 				[13, "Encoded as UTF-8"],
-				[14, "Encoded as UTF-16"],
-				"Separator",
-				["With Custom Length",
-					[15, "Encoded as UTF-8"],
-					[16, "Encoded as UTF-16"],
-				]
+				[14, "Encoded as UTF-16"]
 			]
 		],
 		"Separator",
@@ -99,7 +94,7 @@
 			]
 		},
 		{//1
-			"Title": "Close File Stream on %0 in Slot %1 with flags %2",
+			"Title": "Close File Stream in Slot %0",
 			"Parameters":
 			[
 				["Integer", "Slot to close"],
@@ -316,7 +311,8 @@
 			"Parameters":
 			[
 				["Integer", "Slot"],
-				["Integer", "Position in File (be careful not to exceed the file size)"]
+				["Integer", "Position in File (be careful not to exceed the file size)"],
+				["Integer", "Length in bytes (-1 for Null Terminated)"]
 			]
 		},
 		{//6
@@ -367,7 +363,8 @@
 			"Parameters":
 			[
 				["Integer", "Slot"],
-				["Integer", "Position in File (be careful not to exceed the file size)"]
+				["Integer", "Position in File (be careful not to exceed the file size)"],
+				["Integer", "Length in code points (-1 for Null Terminated)"]
 			]
 		},
 		{//12
@@ -390,26 +387,6 @@
 			[
 				["Integer", "Slot"],
 				["Integer", "Position in File (be careful not to exceed the file size)"]
-			]
-		},
-		{//15
-			"Title": "CustomString8At$(",
-			"Returns": "String",
-			"Parameters":
-			[
-				["Integer", "Slot"],
-				["Integer", "Position in File (be careful not to exceed the file size)"],
-				["Integer", "Size of string in bytes"]
-			]
-		},
-		{//16
-			"Title": "CustomString16At$(",
-			"Returns": "String",
-			"Parameters":
-			[
-				["Integer", "Slot"],
-				["Integer", "Position in File (be careful not to exceed the file size)"],
-				["Integer", "Length of string in UTF-16 code points (not characters or bytes)"]
 			]
 		}
 	]

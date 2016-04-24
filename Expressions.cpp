@@ -91,43 +91,81 @@ float Extension::DoubleAt(int slot, unsigned position)
 	return static_cast<float>(value);
 }
 
-TCHAR const *Extension::String8At(int slot, unsigned position)
+TCHAR const *Extension::String8At(int slot, unsigned position, int bytes)
 {
 	DuringExpression de {*this};
 	std::string str;
 	safe_seekg(slot, position, [=, &str](Slots_t::iterator it)
 	{
-		std::getline(it->second, str, '\0');
-		if(it->second.eof())
+		if(bytes == -1)
 		{
-			generate_error("Reached end of file while reading null-terminated UTF-8 string from position ", position, " for slot ", slot, "; only ", str.size(), " bytes were read");
+			std::getline(it->second, str, '\0');
+			if(it->second.eof())
+			{
+				generate_error("Reached end of file while reading null-terminated UTF-8 string from position ", position, " for slot ", slot, "; only ", str.size(), " bytes were read");
+			}
+			else if(!it->second.good())
+			{
+				generate_error("Could not read null-terminated UTF-8 string from position ", position, " for slot ", slot, "; only ", str.size(), " bytes were read");
+			}
 		}
-		else if(!it->second.good())
+		else
 		{
-			generate_error("Could not read null-terminated UTF-8 string from position ", position, " for slot ", slot, "; only ", str.size(), " bytes were read");
+			std::uint32_t size = static_cast<std::uint32_t>(bytes);
+			auto buf = std::make_unique<std::string::value_type[]>(size);
+			it->second.read(buf.get(), size);
+			str.assign(buf.get(), static_cast<std::size_t>(it->second.gcount()));
+			if(it->second.eof())
+			{
+				generate_error("Reached end of file while reading custom-size UTF-8 string from position ", position, " for slot ", slot, "; only ", str.size(), " of ", size, " bytes were read");
+			}
+			else if(!it->second.good())
+			{
+				generate_error("Could not read custom-size UTF-8 string from position ", position, " for slot ", slot, "; only ", str.size(), " of ", size, " bytes were read");
+			}
 		}
 	});
 	return Runtime.CopyString(str_to16fr8(str).c_str());
 }
 
-TCHAR const *Extension::String16At(int slot, unsigned position)
+TCHAR const *Extension::String16At(int slot, unsigned position, int code_points)
 {
 	DuringExpression de {*this};
 	std::wstring str;
 	safe_seekg(slot, position, [=, &str](Slots_t::iterator it)
 	{
-		for(TCHAR c = _T('\0')
-		;   it->second.read(reinterpret_cast<char *>(&c), sizeof(TCHAR)), it->second.good() && c != _T('\0')
-		;   str += c)
+		if(code_points == -1)
 		{
+			for(TCHAR c = _T('\0')
+			;   it->second.read(reinterpret_cast<char *>(&c), sizeof(TCHAR)), it->second.good() && c != _T('\0')
+			;   str += c)
+			{
+			}
+			if(it->second.eof())
+			{
+				generate_error("Reached end of file while reading null-terminated UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " code points were read");
+			}
+			else if(!it->second.good())
+			{
+				generate_error("Could not read null-terminated UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " code points were read");
+			}
 		}
-		if(it->second.eof())
+		else
 		{
-			generate_error("Reached end of file while reading null-terminated UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " code points were read");
-		}
-		else if(!it->second.good())
-		{
-			generate_error("Could not read null-terminated UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " code points were read");
+			std::uint32_t size = static_cast<std::uint32_t>(code_points);
+			for(TCHAR c = _T('\0')
+			;   str.size() < size && (it->second.read(reinterpret_cast<char *>(&c), sizeof(TCHAR)), it->second.good())
+			;   str += c)
+			{
+			}
+			if(it->second.eof())
+			{
+				generate_error("Reached end of file while reading custom-size UTF-8 string from position ", position, " for slot ", slot, "; only ", str.size(), " of ", size, " bytes were read");
+			}
+			else if(!it->second.good())
+			{
+				generate_error("Could not read custom-size UTF-8 string from position ", position, " for slot ", slot, "; only ", str.size(), " of ", size, " bytes were read");
+			}
 		}
 	});
 	return Runtime.CopyString(str.c_str());
@@ -183,51 +221,6 @@ TCHAR const *Extension::SizedString16At(int slot, unsigned position)
 	return Runtime.CopyString(str.c_str());
 }
 
-TCHAR const *Extension::CustomString8At(int slot, unsigned position, unsigned size)
-{
-	DuringExpression de {*this};
-	std::string str;
-	safe_seekg(slot, position + sizeof(std::uint32_t), [=, &str](Slots_t::iterator it)
-	{
-		auto buf = std::make_unique<std::string::value_type[]>(size);
-		it->second.read(buf.get(), size);
-		str.assign(buf.get(), static_cast<std::size_t>(it->second.gcount()));
-		if(it->second.eof())
-		{
-			generate_error("Reached end of file while reading custom-size UTF-8 string from position ", position, " for slot ", slot, "; only ", str.size(), " of ", size, " bytes were read");
-		}
-		else if(!it->second.good())
-		{
-			generate_error("Could not read custom-size UTF-8 string from position ", position, " for slot ", slot, "; only ", str.size(), " of ", size, " bytes were read");
-		}
-	});
-	return Runtime.CopyString(str_to16fr8(str).c_str());
-}
-
-TCHAR const *Extension::CustomString16At(int slot, unsigned position, unsigned size)
-{
-	DuringExpression de {*this};
-	std::wstring str;
-	safe_seekg(slot, position + sizeof(std::uint32_t), [=, &str](Slots_t::iterator it)
-	{
-		std::uint32_t i = 0;
-		for(TCHAR c = _T('\0')
-		;   it->second.read(reinterpret_cast<char *>(&c), sizeof(TCHAR)), it->second.good() && i < size
-		;   str += c, ++i)
-		{
-		}
-		if(it->second.eof())
-		{
-			generate_error("Reached end of file while reading custom-size UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " of ", size, " code points were read");
-		}
-		else if(!it->second.good())
-		{
-			generate_error("Could not read custom-size UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " of ", size, " code points were read");
-		}
-	});
-	return Runtime.CopyString(str.c_str());
-}
-
 unsigned Extension::ReadCursorPos(int slot)
 {
 	DuringExpression de {*this};
@@ -269,7 +262,7 @@ unsigned Extension::FileSize(int slot)
 			if(it->first.flags & std::ios::in)
 			{
 				auto oldpos = it->second.tellg();
-				it->second.seekg(std::ios::end);
+				it->second.seekg(0, std::ios::end);
 				auto sizepos = it->second.tellg();
 				it->second.seekg(oldpos);
 				if(it->second.good())
@@ -280,7 +273,7 @@ unsigned Extension::FileSize(int slot)
 			if(it->first.flags & std::ios::out)
 			{
 				auto oldpos = it->second.tellp();
-				it->second.seekp(std::ios::end);
+				it->second.seekp(0, std::ios::end);
 				auto sizepos = it->second.tellp();
 				it->second.seekp(oldpos);
 				if(it->second.good())

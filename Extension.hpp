@@ -306,12 +306,10 @@ public:
 	int IntAt(int slot, unsigned position);
 	float FloatAt(int slot, unsigned position);
 	float DoubleAt(int slot, unsigned position);
-	TCHAR const *String8At(int slot, unsigned position);
-	TCHAR const *String16At(int slot, unsigned position);
+	TCHAR const *String8At(int slot, unsigned position, int bytes);
+	TCHAR const *String16At(int slot, unsigned position, int code_points);
 	TCHAR const *SizedString8At(int slot, unsigned position);
 	TCHAR const *SizedString16At(int slot, unsigned position);
-	TCHAR const *CustomString8At(int slot, unsigned position, unsigned bytes);
-	TCHAR const *CustomString16At(int slot, unsigned position, unsigned code_points);
 	unsigned ReadCursorPos(int slot);
 	unsigned WriteCursorPos(int slot);
 	unsigned FileSize(int slot);
