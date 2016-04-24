@@ -162,10 +162,7 @@ public:
 	{
 		std::ostringstream message;
 		using helper = int[];
-		(void)helper
-		{
-			0, (void(message << std::forward<Args>(args)), 0)...
-		};
+		(void)helper{0, (void(message << std::forward<Args>(args)), 0)...};
 		error_msg = str_to16fr8(message.str());
 		if(expression_depth > 0)
 		{
