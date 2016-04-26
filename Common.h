@@ -20,12 +20,15 @@
 #include "Edif.h"
 #include "Resource.h"
 
+#include <bitset>
+#include <cassert>
 #include <cstdint>
 #include <fstream>
 #include <functional>
 #include <map>
 #include <memory>
 #include <sstream>
+#include <type_traits>
 
 using string8  = std::string;
 using string16 = std::wstring;
@@ -95,6 +98,9 @@ inline string16 str_to16fr8(string8 const &s)
  * returned from expressions and conditions).
  */
 typedef std::basic_string<TCHAR> stdtstring;
+
+#undef min
+#undef max
 
 #include "EditData.hpp"
 #include "Extension.hpp"

@@ -160,11 +160,11 @@ TCHAR const *Extension::String16At(int slot, unsigned position, int code_points)
 			}
 			if(it->second.eof())
 			{
-				generate_error("Reached end of file while reading custom-size UTF-8 string from position ", position, " for slot ", slot, "; only ", str.size(), " of ", size, " bytes were read");
+				generate_error("Reached end of file while reading custom-size UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " of ", size, " bytes were read");
 			}
 			else if(!it->second.good())
 			{
-				generate_error("Could not read custom-size UTF-8 string from position ", position, " for slot ", slot, "; only ", str.size(), " of ", size, " bytes were read");
+				generate_error("Could not read custom-size UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " of ", size, " bytes were read");
 			}
 		}
 	});
@@ -218,6 +218,118 @@ TCHAR const *Extension::SizedString16At(int slot, unsigned position)
 			}
 		});
 	}
+	return Runtime.CopyString(str.c_str());
+}
+
+TCHAR const *Extension::StringChars8At(int slot, unsigned position, unsigned chars)
+{
+	if(chars == 0)
+	{
+		return _T("");
+	}
+	DuringExpression de {*this};
+	std::string str;
+	safe_seekg(slot, position, [=, &str](Slots_t::iterator it)
+	{
+		std::size_t chars_read {};
+		do
+		{
+			auto character = read_char<std::string::value_type>(it->second);
+			if(!character.empty())
+			{
+				++chars_read;
+				str += character;
+			}
+		} while(it->second.good() && chars_read < chars);
+		if(it->second.eof())
+		{
+			generate_error("Reached end of file while reading UTF-8 string from position ", position, " for slot ", slot, "; only ", chars_read, " of ", chars, " characters were read");
+		}
+		else if(!it->second.good())
+		{
+			generate_error("Could not read UTF-8 string from position ", position, " for slot ", slot, "; only ", chars_read, " of ", chars, " characters were read");
+		}
+	});
+	return Runtime.CopyString(str_to16fr8(str).c_str());
+}
+
+TCHAR const *Extension::StringChars16At(int slot, unsigned position, unsigned chars)
+{
+	if(chars == 0)
+	{
+		return _T("");
+	}
+	DuringExpression de {*this};
+	std::wstring str;
+	safe_seekg(slot, position, [=, &str](Slots_t::iterator it)
+	{
+		std::size_t chars_read {};
+		do
+		{
+			auto character = read_char<std::wstring::value_type>(it->second);
+			if(!character.empty())
+			{
+				++chars_read;
+				str += character;
+			}
+		} while(it->second.good() && chars_read < chars);
+		if(it->second.eof())
+		{
+			generate_error("Reached end of file while reading custom-size UTF-16 string from position ", position, " for slot ", slot, "; only ", chars_read, " of ", chars, " characters were read");
+		}
+		else if(!it->second.good())
+		{
+			generate_error("Could not read custom-size UTF-16 string from position ", position, " for slot ", slot, "; only ", chars_read, " of ", chars, " characters were read");
+		}
+	});
+	return Runtime.CopyString(str.c_str());
+}
+
+TCHAR const *Extension::StringUntil8At(int slot, unsigned position, TCHAR const *sentry)
+{
+	DuringExpression de {*this};
+	if(!*sentry)
+	{
+		generate_error("Empty sentry when reading UTF-8 string from position ", position, " for slot ", slot);
+		return _T("");
+	}
+	std::string str;
+	safe_seekg(slot, position, [=, &str](Slots_t::iterator it)
+	{
+		//TODO
+		if(it->second.eof())
+		{
+			generate_error("Reached end of file while reading UTF-8 string from position ", position, " for slot ", slot, "; only ", str.size(), " bytes were read");
+		}
+		else if(!it->second.good())
+		{
+			generate_error("Could not read UTF-8 string from position ", position, " for slot ", slot, "; only ", str.size(), " bytes were read");
+		}
+	});
+	return Runtime.CopyString(str_to16fr8(str).c_str());
+}
+
+TCHAR const *Extension::StringUntil16At(int slot, unsigned position, TCHAR const *sentry)
+{
+	DuringExpression de {*this};
+	if(!*sentry)
+	{
+		generate_error("Empty sentry when reading UTF-16 string from position ", position, " for slot ", slot);
+		return _T("");
+	}
+	std::wstring str;
+	safe_seekg(slot, position, [=, &str](Slots_t::iterator it)
+	{
+		//TODO
+		if(it->second.eof())
+		{
+			generate_error("Reached end of file while reading custom-size UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " code points were read");
+		}
+		else if(!it->second.good())
+		{
+			generate_error("Could not read custom-size UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " code points were read");
+		}
+	});
 	return Runtime.CopyString(str.c_str());
 }
 

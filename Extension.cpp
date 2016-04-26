@@ -72,6 +72,10 @@ Extension::Extension(RD *rd, SerializedED *SED, createObjectInfo *COB)
 	LinkExpression(12, GetError);
 	LinkExpression(13, SizedString8At);
 	LinkExpression(14, SizedString16At);
+	LinkExpression(15, StringChars8At);
+	LinkExpression(16, StringChars16At);
+	LinkExpression(17, StringUntil8At);
+	LinkExpression(18, StringUntil16At);
 
 
 	//This is where you'd do anything you'd do in CreateRunObject in the original SDK.

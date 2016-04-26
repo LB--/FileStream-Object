@@ -73,6 +73,14 @@
 			["Length Terminated",
 				[13, "Encoded as UTF-8"],
 				[14, "Encoded as UTF-16"]
+			],
+			["By Number of Whole Characters",
+				[15, "Encoded as UTF-8"],
+				[16, "Encoded as UTF-16"]
+			],
+			["Read Until String",
+				[17, "Encoded as UTF-8"],
+				[18, "Encoded as UTF-16"]
 			]
 		],
 		"Separator",
@@ -387,6 +395,46 @@
 			[
 				["Integer", "Slot"],
 				["Integer", "Position in File (be careful not to exceed the file size)"]
+			]
+		},
+		{//15
+			"Title": "StringChars8At$(",
+			"Returns": "String",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"],
+				["Integer", "Number of whole characters to read"]
+			]
+		},
+		{//16
+			"Title": "StringChars16At$(",
+			"Returns": "String",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"],
+				["Integer", "Number of whole characters to read"]
+			]
+		},
+		{//17
+			"Title": "StringUntil8At$(",
+			"Returns": "String",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"],
+				["String", "Sentry String"]
+			]
+		},
+		{//18
+			"Title": "StringUntil16At$(",
+			"Returns": "String",
+			"Parameters":
+			[
+				["Integer", "Slot"],
+				["Integer", "Position in File (be careful not to exceed the file size)"],
+				["String", "Sentry String"]
 			]
 		}
 	]
