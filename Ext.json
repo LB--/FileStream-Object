@@ -381,7 +381,7 @@
 			[
 				["Integer", "Slot"],
 				["Integer", "Position in File (be careful not to exceed the file size)"],
-				["Integer", "Length in code points (-1 for Null Terminated)"]
+				["Integer", "Length in code units (-1 for Null Terminated)"]
 			]
 		},
 		{//12

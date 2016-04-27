@@ -143,11 +143,11 @@ TCHAR const *Extension::String16At(int slot, unsigned position, int code_points)
 			}
 			if(it->second.eof())
 			{
-				generate_error("Reached end of file while reading null-terminated UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " code points were read");
+				generate_error("Reached end of file while reading null-terminated UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " code units were read");
 			}
 			else if(!it->second.good())
 			{
-				generate_error("Could not read null-terminated UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " code points were read");
+				generate_error("Could not read null-terminated UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " code units were read");
 			}
 		}
 		else
@@ -210,11 +210,11 @@ TCHAR const *Extension::SizedString16At(int slot, unsigned position)
 			}
 			if(it->second.eof())
 			{
-				generate_error("Reached end of file while reading length-terminated UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " of ", size, " code points were read");
+				generate_error("Reached end of file while reading length-terminated UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " of ", size, " code units were read");
 			}
 			else if(!it->second.good())
 			{
-				generate_error("Could not read length-terminated UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " of ", size, " code points were read");
+				generate_error("Could not read length-terminated UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " of ", size, " code units were read");
 			}
 		});
 	}
@@ -354,11 +354,11 @@ TCHAR const *Extension::StringUntil16At(int slot, unsigned position, TCHAR const
 		}
 		if(it->second.eof())
 		{
-			generate_error("Reached end of file while reading UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " code points were read");
+			generate_error("Reached end of file while reading UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " code units were read");
 		}
 		else if(!it->second.good())
 		{
-			generate_error("Could not read UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " code points were read");
+			generate_error("Could not read UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " code units were read");
 		}
 		else //success, chop off the sentry
 		{
