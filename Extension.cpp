@@ -56,6 +56,7 @@ Extension::Extension(RD *rd, SerializedED *SED, createObjectInfo *COB)
 	LinkCondition(1, IsOpen);
 	LinkCondition(2, IsOk);
 	LinkCondition(3, FileExists);
+	LinkCondition(4, IsEof);
 
 	LinkExpression(0, SignedByteAt);
 	LinkExpression(1, SignedShortAt);

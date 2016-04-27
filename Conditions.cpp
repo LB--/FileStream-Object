@@ -25,6 +25,16 @@ bool Extension::IsOk(int slot)
 	return it != std::cend(slots) && !it->second.bad();
 }
 
+bool Extension::IsEof(int slot)
+{
+	auto const it = slots.find(slot);
+	if(it != std::end(slots) && safe_helper(it))
+	{
+		return it->second.peek() == std::fstream::traits_type::eof();
+	}
+	return false;
+}
+
 bool Extension::FileExists(TCHAR const *filepath)
 {
 	auto const it = std::as_const(slots).find(filepath);

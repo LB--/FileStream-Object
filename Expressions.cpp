@@ -275,11 +275,11 @@ TCHAR const *Extension::StringChars16At(int slot, unsigned position, unsigned ch
 		} while(it->second.good() && chars_read < chars);
 		if(it->second.eof())
 		{
-			generate_error("Reached end of file while reading custom-size UTF-16 string from position ", position, " for slot ", slot, "; only ", chars_read, " of ", chars, " characters were read");
+			generate_error("Reached end of file while reading UTF-16 string from position ", position, " for slot ", slot, "; only ", chars_read, " of ", chars, " characters were read");
 		}
 		else if(!it->second.good())
 		{
-			generate_error("Could not read custom-size UTF-16 string from position ", position, " for slot ", slot, "; only ", chars_read, " of ", chars, " characters were read");
+			generate_error("Could not read UTF-16 string from position ", position, " for slot ", slot, "; only ", chars_read, " of ", chars, " characters were read");
 		}
 	});
 	return Runtime.CopyString(str.c_str());
@@ -288,15 +288,28 @@ TCHAR const *Extension::StringChars16At(int slot, unsigned position, unsigned ch
 TCHAR const *Extension::StringUntil8At(int slot, unsigned position, TCHAR const *sentry)
 {
 	DuringExpression de {*this};
-	if(!*sentry)
+	std::string const sentry_str = str_to8fr16(sentry);
+	if(sentry_str.empty())
 	{
 		generate_error("Empty sentry when reading UTF-8 string from position ", position, " for slot ", slot);
 		return _T("");
 	}
 	std::string str;
-	safe_seekg(slot, position, [=, &str](Slots_t::iterator it)
+	safe_seekg(slot, position, [=, &sentry_str, &str](Slots_t::iterator it)
 	{
-		//TODO
+		{ //initially read the length of the sentry (if we read less, the stream will be in an error state)
+			auto buf = std::make_unique<std::string::value_type[]>(sentry_str.size());
+			it->second.read(buf.get(), sentry_str.size());
+			str.assign(buf.get(), static_cast<std::size_t>(it->second.gcount()));
+		}
+		//then loop until the end of the string matches the sentry (or error)
+		auto next = std::fstream::traits_type::eof();
+		while(it->second.good()
+		&&    !std::equal(std::crbegin(sentry_str), std::crend(sentry_str), std::crbegin(str))
+		&&    (next = it->second.get()) != std::fstream::traits_type::eof())
+		{
+			str += static_cast<char>(next);
+		}
 		if(it->second.eof())
 		{
 			generate_error("Reached end of file while reading UTF-8 string from position ", position, " for slot ", slot, "; only ", str.size(), " bytes were read");
@@ -305,6 +318,10 @@ TCHAR const *Extension::StringUntil8At(int slot, unsigned position, TCHAR const 
 		{
 			generate_error("Could not read UTF-8 string from position ", position, " for slot ", slot, "; only ", str.size(), " bytes were read");
 		}
+		else //success, chop off the sentry
+		{
+			str.resize(str.size() - sentry_str.size());
+		}
 	});
 	return Runtime.CopyString(str_to16fr8(str).c_str());
 }
@@ -312,22 +329,40 @@ TCHAR const *Extension::StringUntil8At(int slot, unsigned position, TCHAR const 
 TCHAR const *Extension::StringUntil16At(int slot, unsigned position, TCHAR const *sentry)
 {
 	DuringExpression de {*this};
-	if(!*sentry)
+	stdtstring sentry_str = sentry;
+	if(sentry_str.empty())
 	{
 		generate_error("Empty sentry when reading UTF-16 string from position ", position, " for slot ", slot);
 		return _T("");
 	}
 	std::wstring str;
-	safe_seekg(slot, position, [=, &str](Slots_t::iterator it)
+	safe_seekg(slot, position, [=, &sentry_str, &str](Slots_t::iterator it)
 	{
-		//TODO
+		//initially read the length of the sentry (if we read less, the stream will be in an error state)
+		for(TCHAR c = _T('\0')
+		;   str.size() < sentry_str.size() && (it->second.read(reinterpret_cast<char *>(&c), sizeof(TCHAR)), it->second.good())
+		;   str += c)
+		{
+		}
+		//then loop until the end of the string matches the sentry (or error)
+		for(TCHAR c = _T('\0')
+		;   it->second.good()
+		&&  !std::equal(std::crbegin(sentry_str), std::crend(sentry_str), std::crbegin(str))
+		&&  (it->second.read(reinterpret_cast<char *>(&c), sizeof(TCHAR)), it->second.good())
+		;   str += c)
+		{
+		}
 		if(it->second.eof())
 		{
-			generate_error("Reached end of file while reading custom-size UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " code points were read");
+			generate_error("Reached end of file while reading UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " code points were read");
 		}
 		else if(!it->second.good())
 		{
-			generate_error("Could not read custom-size UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " code points were read");
+			generate_error("Could not read UTF-16 string from position ", position, " for slot ", slot, "; only ", str.size(), " code points were read");
+		}
+		else //success, chop off the sentry
+		{
+			str.resize(str.size() - sentry_str.size());
 		}
 	});
 	return Runtime.CopyString(str.c_str());

@@ -20,6 +20,7 @@
 #include "Edif.h"
 #include "Resource.h"
 
+#include <algorithm>
 #include <bitset>
 #include <cassert>
 #include <cstdint>

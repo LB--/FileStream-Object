@@ -187,10 +187,7 @@ public:
 		{
 			return generate_error("Slot ", it->first.id, " is in an unrecoverable error state from a previous operation - close the stream and try again"), false;
 		}
-		if(fs.fail() || fs.eof())
-		{
-			fs.clear();
-		}
+		fs.clear();
 		return true;
 	}
 	template<typename F>
@@ -368,6 +365,7 @@ public:
 	bool OnError();
 	bool IsOpen(int slot);
 	bool IsOk(int slot);
+	bool IsEof(int slot);
 	bool FileExists(TCHAR const *filepath);
 
 	//Expressions - Defined in Expressions.cpp

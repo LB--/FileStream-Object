@@ -49,6 +49,7 @@
 		"Separator",
 		[1, "File is Open"],
 		[2, "File is OK"],
+		[4, "Read Cursor is at End of File"],
 		"Separator",
 		[3, "File Exists/has Read Access"],
 		"Separator"
@@ -262,6 +263,14 @@
 			"Parameters":
 			[
 				["String", "Path to File"]
+			],
+			"Triggered": false
+		},
+		{//4
+			"Title": "%o: Slot %0 read cursor is at End of File",
+			"Parameters":
+			[
+				["Integer", "Slot to Check"]
 			],
 			"Triggered": false
 		}
