@@ -75,7 +75,7 @@
 				[13, "Encoded as UTF-8"],
 				[14, "Encoded as UTF-16"]
 			],
-			["By Number of Whole Characters",
+			["By Number of Whole Code Points",
 				[15, "Encoded as UTF-8"],
 				[16, "Encoded as UTF-16"]
 			],
@@ -413,7 +413,7 @@
 			[
 				["Integer", "Slot"],
 				["Integer", "Position in File (be careful not to exceed the file size)"],
-				["Integer", "Number of whole characters to read"]
+				["Integer", "Number of whole code points to read"]
 			]
 		},
 		{//16
@@ -423,7 +423,7 @@
 			[
 				["Integer", "Slot"],
 				["Integer", "Position in File (be careful not to exceed the file size)"],
-				["Integer", "Number of whole characters to read"]
+				["Integer", "Number of whole code points to read"]
 			]
 		},
 		{//17

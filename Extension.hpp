@@ -259,13 +259,13 @@ public:
 	}
 
 	template<typename CharT>
-	static std::basic_string<CharT> read_char(std::istream &in)
+	static std::basic_string<CharT> read_codepoint(std::istream &in)
 	{
 		if(!in.good())
 		{
 			return {};
 		}
-		std::basic_string<CharT> character;
+		std::basic_string<CharT> codepoint;
 		auto peeked = std::fstream::traits_type::eof();
 		CharT code_point {};
 		bool utf = false;
@@ -274,28 +274,28 @@ public:
 		{
 			static constexpr std::size_t num_bits {sizeof(char)*CHAR_BIT};
 			std::bitset<num_bits> byte {static_cast<unsigned char>(static_cast<char>(peeked))};
-			if(!utf) //not inside a UTF character
+			if(!utf) //not inside a UTF codepoint
 			{
-				if(byte[num_bits-1] && byte[num_bits-2]) //start of UTF character
+				if(byte[num_bits-1] && byte[num_bits-2]) //start of UTF codepoint
 				{
 					in.read(reinterpret_cast<char *>(&code_point), sizeof(code_point));
 					if(!in.good())
 					{
 						return {};
 					}
-					character += code_point;
+					codepoint += code_point;
 					utf = true;
 					for(auto i = num_bits-2; i > 0 && byte[i]; --i)
 					{
 						++utf_length;
 					}
 				}
-				else if(byte[num_bits-1] && !byte[num_bits-2]) //continutation of UTF character, but without context
+				else if(byte[num_bits-1] && !byte[num_bits-2]) //continutation of UTF codepoint, but without context
 				{
 					in.setstate(std::ios::failbit);
 					return {};
 				}
-				else //single byte character
+				else //single byte codepoint
 				{
 					in.read(reinterpret_cast<char *>(&code_point), sizeof(code_point));
 					if(!in.good())
@@ -305,31 +305,31 @@ public:
 					return {code_point};
 				}
 			}
-			else if(utf_length > 0 && byte[num_bits-1] && !byte[num_bits-2]) //continuation of UTF character
+			else if(utf_length > 0 && byte[num_bits-1] && !byte[num_bits-2]) //continuation of UTF codepoint
 			{
 				in.read(reinterpret_cast<char *>(&code_point), sizeof(code_point));
 				if(!in.good())
 				{
 					return {};
 				}
-				character += code_point;
+				codepoint += code_point;
 				--utf_length;
 			}
-			else //start of another character
+			else //start of another codepoint
 			{
 				break;
 			}
 		}
-		if(character.size() > 0 && utf_length == 0 && peeked == std::fstream::traits_type::eof())
+		if(codepoint.size() > 0 && utf_length == 0 && peeked == std::fstream::traits_type::eof())
 		{
-			//we read a character successfully and peeking to the next set EOF, so we need to unset it
+			//we read a codepoint successfully and peeking to the next set EOF, so we need to unset it
 			//(I have no idea why the standard requires this behavior, it makes peek almost useless
 			//aside from not having to rewind the stream)
 			auto newstate = (in.rdstate() & ~std::ios::eofbit);
 			in.clear();
 			in.setstate(newstate);
 		}
-		return character;
+		return codepoint;
 	}
 
 	/* Add your actions, conditions, and expressions
@@ -377,12 +377,12 @@ public:
 	int IntAt(int slot, unsigned position);
 	float FloatAt(int slot, unsigned position);
 	float DoubleAt(int slot, unsigned position);
-	TCHAR const *String8At(int slot, unsigned position, int bytes);
-	TCHAR const *String16At(int slot, unsigned position, int code_points);
+	TCHAR const *String8At(int slot, unsigned position, int codeunits);
+	TCHAR const *String16At(int slot, unsigned position, int codeunits);
 	TCHAR const *SizedString8At(int slot, unsigned position);
 	TCHAR const *SizedString16At(int slot, unsigned position);
-	TCHAR const *StringChars8At(int slot, unsigned position, unsigned chars);
-	TCHAR const *StringChars16At(int slot, unsigned position, unsigned chars);
+	TCHAR const *StringChars8At(int slot, unsigned position, unsigned codepoints);
+	TCHAR const *StringChars16At(int slot, unsigned position, unsigned codepoints);
 	TCHAR const *StringUntil8At(int slot, unsigned position, TCHAR const *sentry);
 	TCHAR const *StringUntil16At(int slot, unsigned position, TCHAR const *sentry);
 	unsigned ReadCursorPos(int slot);
