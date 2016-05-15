@@ -6,7 +6,7 @@
 		"Copyright": "Copyright © 2016 Nicholas \"LB\" Braden",
 		"Comment": "This object allows you to open and manage file streams without loading the files into memory.\nMade by request for Alonso.\nIcon thanks to Alonso.",
 		"URL": "http://www.LB-Stuff.com/MMF2/Extensions/",
-		"Help": "Help/File Stream/Help.chm",
+		"Help": "Examples/FileStream/ReadLines8.mfa",
 		"Identifier": "FSTR"
 	},
 
@@ -27,12 +27,12 @@
 		["Set String",
 			["(Optionally) Null Terminated",
 				[7, "Encoded as UTF-8"],
-				[9, "Encoded as UTF-16"],
+				[9, "Encoded as UTF-16LE"],
 			],
 			"separator",
 			["Length Terminated",
 				[12, "Encoded as UTF-8"],
-				[13, "Encoded as UTF-16"],
+				[13, "Encoded as UTF-16LE"],
 			]
 		],
 		"Separator",
@@ -69,19 +69,19 @@
 		["Get String",
 			["Null Terminated or Custom Length",
 				[5, "Encoded as UTF-8"],
-				[11, "Encoded as UTF-16"],
+				[11, "Encoded as UTF-16LE"],
 			],
 			["Length Terminated",
 				[13, "Encoded as UTF-8"],
-				[14, "Encoded as UTF-16"]
+				[14, "Encoded as UTF-16LE"]
 			],
 			["By Number of Whole Code Points",
 				[15, "Encoded as UTF-8"],
-				[16, "Encoded as UTF-16"]
+				[16, "Encoded as UTF-16LE"]
 			],
 			["Read Until String",
 				[17, "Encoded as UTF-8"],
-				[18, "Encoded as UTF-16"]
+				[18, "Encoded as UTF-16LE"]
 			]
 		],
 		"Separator",
@@ -172,7 +172,7 @@
 			]
 		},
 		{//9
-			"Title": "Slot %0: Set utf-16 string at %1 to %2 (null terminate = %3)",
+			"Title": "Slot %0: Set utf-16le string at %1 to %2 (null terminate = %3)",
 			"Parameters":
 			[
 				["Integer", "Slot"],
@@ -211,7 +211,7 @@
 			]
 		},
 		{//13
-			"Title": "Slot %0: Set utf-16 string at %1 to %2 (with size prefix)",
+			"Title": "Slot %0: Set utf-16le string at %1 to %2 (with size prefix)",
 			"Parameters":
 			[
 				["Integer", "Slot"],
@@ -375,7 +375,7 @@
 			]
 		},
 		{//11
-			"Title": "String16At$(",
+			"Title": "String16leAt$(",
 			"Returns": "String",
 			"Parameters":
 			[
@@ -398,7 +398,7 @@
 			]
 		},
 		{//14
-			"Title": "SizedString16At$(",
+			"Title": "SizedString16leAt$(",
 			"Returns": "String",
 			"Parameters":
 			[
@@ -417,7 +417,7 @@
 			]
 		},
 		{//16
-			"Title": "StringChars16At$(",
+			"Title": "StringChars16leAt$(",
 			"Returns": "String",
 			"Parameters":
 			[
@@ -437,7 +437,7 @@
 			]
 		},
 		{//18
-			"Title": "StringUntil16At$(",
+			"Title": "StringUntil16leAt$(",
 			"Returns": "String",
 			"Parameters":
 			[
